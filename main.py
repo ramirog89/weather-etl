@@ -8,22 +8,8 @@ from src.infrastructure.http import HTTPClient, OpenMeteoClient, OpenMeteoGeocod
 from src.infrastructure.storage.csv import CSVLoader
 from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisualizer
 
-DEFAULT_CITIES = [
-    "New York",
-    "Tokyo",
-    "London",
-    "Paris",
-    "Berlin",
-    "Sydney",
-    "Mumbai",
-    "Cape Town",
-    "Moscow",
-    "Rio de Janeiro",
-]
 
 def main(city_names: List[str] = None):
-    # input data
-    target_names = city_names or DEFAULT_CITIES
 
     # infrastructure
     http_client = HTTPClient()
@@ -38,7 +24,7 @@ def main(city_names: List[str] = None):
 
     # Resolve Cities via Application Service
     city_resolver = CityResolverService(geocoding_adapter=geocoding_adapter)
-    cities = city_resolver.resolve_cities(target_names)
+    cities = city_resolver.resolve_cities(city_names)
 
     if not cities:
         print("Error: No valid cities resolved. Aborting pipeline.")
@@ -72,7 +58,11 @@ if __name__ == "__main__":
         "--cities",
         nargs="+",
         type=str,
-        help="List of city names to fetch weather for. Example: --cities 'Buenos Aires' Madrid 'Rome'",
+        default=[
+            "New York", "Tokyo", "London", "Paris", "Berlin",
+            "Sydney", "Mumbai", "Cape Town", "Moscow", "Rio de Janeiro"
+        ],
+        help="Space-separated list of cities (default: 10 major global cities).",
     )
 
     args = parser.parse_args()
