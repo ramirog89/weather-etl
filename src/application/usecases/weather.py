@@ -4,7 +4,8 @@ import pandas as pd
 from src.application.ports.extractor import ExtractorPort
 from src.application.ports.transformer import TransformerPort
 from src.domain import City, Weather
-from src.infrastructure.openmeteo import OpenMeteoClient
+from src.infrastructure.http.openmeteo import OpenMeteoClient
+
 
 class WeatherExtractor(ExtractorPort[List[Weather]]):
     def __init__(self, provider: OpenMeteoClient, cities: List[City]):

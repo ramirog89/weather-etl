@@ -1,44 +1,48 @@
-from src.domain import City
+import argparse
+from typing import List
 
-from src.application.services import ETLPipeline
+from src.application.services import ETLPipeline, CityResolverService
 from src.application.usecases.weather import WeatherExtractor, WeatherTransformer
-
 from src.infrastructure.config import settings
-from src.infrastructure.http import HTTPClient, OpenMeteoClient
+from src.infrastructure.http import HTTPClient, OpenMeteoClient, OpenMeteoGeocodingClient
 from src.infrastructure.storage.csv import CSVLoader
 from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisualizer
 
-def main():
-    # input data
-    raw_cities = [
-        {"City": "New York", "Latitude": 40.7128, "Longitude": -74.0060},
-        {"City": "Tokyo", "Latitude": 35.6895, "Longitude": 139.6917},
-        {"City": "London", "Latitude": 51.5074, "Longitude": -0.1278},
-        {"City": "Paris", "Latitude": 48.8566, "Longitude": 2.3522},
-        {"City": "Berlin", "Latitude": 52.5200, "Longitude": 13.4050},
-        {"City": "Sydney", "Latitude": -33.8688, "Longitude": 151.2093},
-        {"City": "Mumbai", "Latitude": 19.0760, "Longitude": 72.8777},
-        {"City": "Cape Town", "Latitude": -33.9249, "Longitude": 18.4241},
-        {"City": "Moscow", "Latitude": 55.7558, "Longitude": 37.6173},
-        {"City": "Rio de Janeiro", "Latitude": -22.9068, "Longitude": -43.1729}
-    ]
+DEFAULT_CITIES = [
+    "New York",
+    "Tokyo",
+    "London",
+    "Paris",
+    "Berlin",
+    "Sydney",
+    "Mumbai",
+    "Cape Town",
+    "Moscow",
+    "Rio de Janeiro",
+]
 
-    cities = [
-        City(
-            name=item["City"],
-            latitude=item["Latitude"],
-            longitude=item["Longitude"],
-        )
-        for item in raw_cities
-    ]
+def main(city_names: List[str] = None):
+    # input data
+    target_names = city_names or DEFAULT_CITIES
 
     # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(
         http_client=http_client,
         base_url=settings.open_meteo_base_url)
+    geocoding_adapter = OpenMeteoGeocodingClient(
+        http_client=http_client,
+        base_url=settings.open_meteo_geocoding_base_url)
     csv_loader = CSVLoader()
     visualizer = MatplotlibWeatherVisualizer()
+
+    # Resolve Cities via Application Service
+    city_resolver = CityResolverService(geocoding_adapter=geocoding_adapter)
+    cities = city_resolver.resolve_cities(target_names)
+
+    if not cities:
+        print("Error: No valid cities resolved. Aborting pipeline.")
+        return
 
     # application
     weather_extractor = WeatherExtractor(provider=open_meteo_client, cities=cities)
@@ -60,4 +64,16 @@ def main():
     print("--- Done ---")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Run Weather ETL Pipeline for specified cities."
+    )
+    # Allows passing multiple space-separated city names (or quote multi-word names)
+    parser.add_argument(
+        "--cities",
+        nargs="+",
+        type=str,
+        help="List of city names to fetch weather for. Example: --cities 'Buenos Aires' Madrid 'Rome'",
+    )
+
+    args = parser.parse_args()
+    main(city_names=args.cities)
