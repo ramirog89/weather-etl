@@ -2,6 +2,7 @@ from src.domain import City
 from src.infrastructure.http.api import HTTPClient
 from src.infrastructure.openmeteo import OpenMeteoClient
 from src.infrastructure.storage.csv import CSVLoader
+from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisualizer
 from src.application.services import ETLPipeline
 from src.application.usecases.weather import WeatherExtractor, WeatherTransformer
 
@@ -33,6 +34,7 @@ def main():
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(http_client=http_client)
     csv_loader = CSVLoader()
+    visualizer = MatplotlibWeatherVisualizer()
 
     # application
     weather_extractor = WeatherExtractor(provider=open_meteo_client, cities=cities)
@@ -49,6 +51,8 @@ def main():
     output = pipeline.run(destination="weather_data.csv")
     print("--- Pipeline Execution Complete ---")
     print(output.to_string())
+
+    visualizer.plot_temperature_bar_chart(output, output_path="temperature_chart.png")
 
 if __name__ == "__main__":
     main()
