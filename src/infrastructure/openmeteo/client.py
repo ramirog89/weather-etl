@@ -4,10 +4,10 @@ from src.infrastructure.http.api import HTTPClient
 
 
 class OpenMeteoClient(ExtractorPort):
-    BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
-    def __init__(self, http_client: HTTPClient):
+    def __init__(self, http_client: HTTPClient, base_url: str):
         self.http_client = http_client
+        self.base_url = base_url
 
     def extract(self, city: City) -> Weather:
         params = {
@@ -17,7 +17,7 @@ class OpenMeteoClient(ExtractorPort):
             "wind_speed_unit": "mph",
         }
         
-        payload = self.http_client.get(self.BASE_URL, params=params)
+        payload = self.http_client.get(self.base_url, params=params)
         data = payload["current"]
 
         return Weather(

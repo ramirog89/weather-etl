@@ -1,4 +1,5 @@
 from src.domain import City
+from src.infrastructure.config import settings
 from src.infrastructure.http.api import HTTPClient
 from src.infrastructure.openmeteo import OpenMeteoClient
 from src.infrastructure.storage.csv import CSVLoader
@@ -32,7 +33,9 @@ def main():
 
     # infrastructure
     http_client = HTTPClient()
-    open_meteo_client = OpenMeteoClient(http_client=http_client)
+    open_meteo_client = OpenMeteoClient(
+        http_client=http_client,
+        base_url=settings.open_meteo_base_url)
     csv_loader = CSVLoader()
     visualizer = MatplotlibWeatherVisualizer()
 
@@ -48,11 +51,12 @@ def main():
     )
 
     print("--- Executing Weather ETL Use Case ---")
-    output = pipeline.run(destination="weather_data.csv")
-    print("--- Pipeline Execution Complete ---")
-    print(output.to_string())
+    output = pipeline.run(destination=settings.csv_output_path)
+    print("--- Pipeline Execution Complete ---\n")
 
-    visualizer.plot_temperature_bar_chart(output, output_path="temperature_chart.png")
+    print("--- Generating Plot Temperature Bar Chart ---")
+    visualizer.plot_temperature_bar_chart(output, output_path=settings.chart_output_path)
+    print("--- Done ---")
 
 if __name__ == "__main__":
     main()
