@@ -14,6 +14,7 @@ class OpenMeteoClient(WeatherProviderPort):
             "latitude": city.latitude,
             "longitude": city.longitude,
             "current": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+            "wind_speed_unit": "mph",
         }
         
         payload = self.http_client.get(self.BASE_URL, params=params)
@@ -21,7 +22,7 @@ class OpenMeteoClient(WeatherProviderPort):
 
         return Weather(
             city_name=city.name,
-            temperature_f=data["temperature_2m"],
+            temperature_c=data["temperature_2m"],
             wind_speed_mph=data["wind_speed_10m"],
             humidity=data["relative_humidity_2m"],
         )

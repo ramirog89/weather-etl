@@ -1,14 +1,16 @@
 from src.domain import City
 from src.infrastructure.http.api import HTTPClient
 from src.infrastructure.openmeteo import OpenMeteoClient
-from src.application.services.extract_weather import ExtractWeatherService
+from src.application.services import ExtractWeatherService, TransformWeatherService
 
 def main():
-    # infra
+    # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(http_client=http_client)
 
+    # application
     extract_weather_service = ExtractWeatherService(provider=open_meteo_client)
+    transform_service = TransformWeatherService()
 
     raw_cities = [
         {"City": "New York", "Latitude": 40.7128, "Longitude": -74.0060},
@@ -32,12 +34,14 @@ def main():
         for item in raw_cities
     ]
 
-    # Extract weather from cities:
+    print("1. Extracting weather data...")
     extracted_weather = extract_weather_service.execute(cities)
 
-    for record in extracted_weather:
-        print(f"==== Weather response for: {record.city_name} ====")
-        print(record)
+    print("2. Transforming weather data with Pandas...")
+    weather_df = transform_service.execute(extracted_weather)
+
+    print("\n--- Processed Weather DataFrame ---")
+    print(weather_df.to_string())
 
 
 if __name__ == "__main__":
