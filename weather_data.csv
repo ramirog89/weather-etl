@@ -1,0 +1,11 @@
+city_name,temperature_c,temperature_f,humidity,wind_speed_mph,wind_speed_ms
+Mumbai,28.3,82.94,77,6.7,3.0
+New York,22.6,72.68,84,5.6,2.5
+Rio de Janeiro,21.9,71.42,66,5.5,2.46
+Paris,21.9,71.42,44,9.3,4.16
+Moscow,21.1,69.98,50,7.3,3.26
+Tokyo,20.3,68.54,78,4.4,1.97
+London,19.9,67.82,45,10.1,4.52
+Berlin,19.6,67.28,49,7.5,3.35
+Cape Town,17.4,63.32,59,16.6,7.42
+Sydney,11.9,53.42,87,4.4,1.97

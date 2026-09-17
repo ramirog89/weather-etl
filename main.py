@@ -1,16 +1,19 @@
 from src.domain import City
 from src.infrastructure.http.api import HTTPClient
 from src.infrastructure.openmeteo import OpenMeteoClient
-from src.application.services import ExtractWeatherService, TransformWeatherService
+from src.infrastructure.storage.csv import CSVWeatherLoader
+from src.application.services import ExtractWeatherService, TransformWeatherService, LoadWeatherService
 
 def main():
     # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(http_client=http_client)
+    csv_weather_loader = CSVWeatherLoader()
 
     # application
     extract_weather_service = ExtractWeatherService(provider=open_meteo_client)
-    transform_service = TransformWeatherService()
+    transform_weather_service = TransformWeatherService()
+    load_weather_service = LoadWeatherService(loader=csv_weather_loader)
 
     raw_cities = [
         {"City": "New York", "Latitude": 40.7128, "Longitude": -74.0060},
@@ -38,7 +41,10 @@ def main():
     extracted_weather = extract_weather_service.execute(cities)
 
     print("2. Transforming weather data with Pandas...")
-    weather_df = transform_service.execute(extracted_weather)
+    weather_df = transform_weather_service.execute(extracted_weather)
+
+    print("3. Loading weather data to csv...")
+    load_weather_service.execute(df=weather_df, output_path="weather_data.csv")
 
     print("\n--- Processed Weather DataFrame ---")
     print(weather_df.to_string())

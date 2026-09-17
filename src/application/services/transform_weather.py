@@ -18,8 +18,8 @@ class TransformWeatherService:
             "temperature_c",
             "temperature_f",
             "humidity",
-            "wind_speed_mph",
             "wind_speed_ms",
+            "wind_speed_mph",
         ]
 
         return df[columns]
