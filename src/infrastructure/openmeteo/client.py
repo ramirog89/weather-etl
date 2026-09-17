@@ -1,8 +1,9 @@
+from src.application.ports.weather_provider import WeatherProviderPort
 from src.domain import City, Weather
 from src.infrastructure.http.api import HTTPClient
 
 
-class OpenMeteoClient:
+class OpenMeteoClient(WeatherProviderPort):
     BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
     def __init__(self, http_client: HTTPClient):
