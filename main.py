@@ -1,11 +1,12 @@
 from src.domain import City
-from src.infrastructure.config import settings
-from src.infrastructure.http.api import HTTPClient
-from src.infrastructure.openmeteo import OpenMeteoClient
-from src.infrastructure.storage.csv import CSVLoader
-from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisualizer
+
 from src.application.services import ETLPipeline
 from src.application.usecases.weather import WeatherExtractor, WeatherTransformer
+
+from src.infrastructure.config import settings
+from src.infrastructure.http import HTTPClient, OpenMeteoClient
+from src.infrastructure.storage.csv import CSVLoader
+from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisualizer
 
 def main():
     # input data

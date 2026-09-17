@@ -1,6 +1,6 @@
 from src.application.ports.extractor import ExtractorPort
 from src.domain import City, Weather
-from src.infrastructure.http.api import HTTPClient
+from src.infrastructure.http.client import HTTPClient
 
 
 class OpenMeteoClient(ExtractorPort):
