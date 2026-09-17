@@ -1,35 +1,46 @@
 from typing import List
 import pandas as pd
 
-from src.application.usecases.base import BaseETLPipeline
-from src.application.services import (
-    ExtractWeatherService,
-    TransformWeatherService,
-    LoadWeatherService,
-)
+from src.application.ports.extractor import ExtractorPort
+from src.application.ports.transformer import TransformerPort
 from src.domain import City, Weather
+from src.infrastructure.openmeteo import OpenMeteoClient
 
-
-class WeatherUseCase(BaseETLPipeline[List[Weather], pd.DataFrame]):
-    def __init__(
-        self,
-        cities: List[City],
-        extract_service: ExtractWeatherService,
-        transform_service: TransformWeatherService,
-        load_service: LoadWeatherService,
-        output_path: str = "weather_data.csv",
-    ):
+class WeatherExtractor(ExtractorPort[List[Weather]]):
+    def __init__(self, provider: OpenMeteoClient, cities: List[City]):
+        self.provider = provider
         self.cities = cities
-        self.extract_service = extract_service
-        self.transform_service = transform_service
-        self.load_service = load_service
-        self.output_path = output_path
 
     def extract(self) -> List[Weather]:
-        return self.extract_service.execute(self.cities)
+        return [self.provider.extract(c) for c in self.cities]
 
+class WeatherTransformer(TransformerPort[List[Weather]]):
     def transform(self, data: List[Weather]) -> pd.DataFrame:
-        return self.transform_service.execute(data)
+        if not data:
+            return pd.DataFrame()
 
-    def load(self, data: pd.DataFrame) -> None:
-        self.load_service.execute(data, output_path=self.output_path)
+        records = [w.model_dump() for w in data]
+        df = pd.DataFrame(records)
+        df = df.sort_values(by="temperature_c", ascending=False).reset_index(drop=True)
+
+        column_mapping = {
+            "city_name": "City",
+            "temperature_c": "Temperature (C)",
+            "temperature_f": "Temperature (F)",
+            "humidity": "Humidity (%)",
+            "wind_speed_ms": "Wind Speed (m/s)",
+            "wind_speed_mph": "Wind Speed (mph)",
+        }
+
+        df = df.rename(columns=column_mapping)
+
+        ordered_columns = [
+            "City",
+            "Temperature (C)",
+            "Temperature (F)",
+            "Humidity (%)",
+            "Wind Speed (m/s)",
+            "Wind Speed (mph)",
+        ]
+
+        return df[ordered_columns]

@@ -1,9 +1,9 @@
 from src.domain import City
 from src.infrastructure.http.api import HTTPClient
 from src.infrastructure.openmeteo import OpenMeteoClient
-from src.infrastructure.storage.csv import CSVWeatherLoader
-from src.application.services import ExtractWeatherService, TransformWeatherService, LoadWeatherService
-from src.application.usecases.weather import WeatherUseCase
+from src.infrastructure.storage.csv import CSVLoader
+from src.application.services import ETLPipeline
+from src.application.usecases.weather import WeatherExtractor, WeatherTransformer
 
 def main():
     # input data
@@ -32,24 +32,21 @@ def main():
     # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(http_client=http_client)
-    csv_weather_loader = CSVWeatherLoader()
+    csv_loader = CSVLoader()
 
     # application
-    extract_weather_service = ExtractWeatherService(provider=open_meteo_client)
-    transform_weather_service = TransformWeatherService()
-    load_weather_service = LoadWeatherService(loader=csv_weather_loader)
+    weather_extractor = WeatherExtractor(provider=open_meteo_client, cities=cities)
+    weather_transformer = WeatherTransformer()
 
-    # use cases
-    weather_usecase = WeatherUseCase(
-        cities=cities,
-        extract_service=extract_weather_service,
-        transform_service=transform_weather_service,
-        load_service=load_weather_service,
-        output_path="weather_data.csv",
+    # Weather ETL Pipeline
+    pipeline = ETLPipeline(
+        extractor=weather_extractor,
+        transformer=weather_transformer,
+        loader=csv_loader,
     )
 
     print("--- Executing Weather ETL Use Case ---")
-    output = weather_usecase.run()
+    output = pipeline.run(destination="weather_data.csv")
     print("--- Pipeline Execution Complete ---")
     print(output.to_string())
 

@@ -1,15 +1,15 @@
-from src.application.ports.weather_provider import WeatherProviderPort
+from src.application.ports.extractor import ExtractorPort
 from src.domain import City, Weather
 from src.infrastructure.http.api import HTTPClient
 
 
-class OpenMeteoClient(WeatherProviderPort):
+class OpenMeteoClient(ExtractorPort):
     BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
     def __init__(self, http_client: HTTPClient):
         self.http_client = http_client
 
-    def fetch_weather(self, city: City) -> Weather:
+    def extract(self, city: City) -> Weather:
         params = {
             "latitude": city.latitude,
             "longitude": city.longitude,

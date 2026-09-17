@@ -1,9 +1,9 @@
 import pandas as pd
-from src.application.ports.weather_loader import WeatherLoaderPort
+from src.application.ports.loader import LoaderPort
 
 
-class CSVWeatherLoader(WeatherLoaderPort):
-    def save(self, df: pd.DataFrame, destination: str) -> None:
+class CSVLoader(LoaderPort):
+    def load(self, df: pd.DataFrame, destination: str) -> None:
         if df.empty:
             raise ValueError("Cannot write an empty DataFrame to CSV.")
 
