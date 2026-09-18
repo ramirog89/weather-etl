@@ -9,11 +9,11 @@ A modular, clean-architecture Python ETL pipeline designed to extract weather da
 ```text
 src/
 ├── application/
-│   ├── ports/              # Abstract Interfaces (Extractor, Transformer, Loader)
-│   └── services/           # Reusable Generic ETL Engine
-├── domain/                 # Domain Entities & Models (City, Weather)
-├── infrastructure/         # External Adapters (HTTP Client, OpenMeteo API, CSV Writer)
-└── use_cases/              # Concrete Pipelines (Weather Extractor & Transformer)
+│   ├── ports/              # Abstract Interfaces (Extractor, Transformer, Loader, Geocoding)
+│   └── services/           # Application Services (ETLPipeline, CityResolverService)
+├── domain/                 # Domain Entities & Models (City, Weather, Custom Exceptions)
+├── infrastructure/         # External Adapters (HTTP Client, OpenMeteo APIs, CSV Loader, Visualizer)
+└── use_cases/              # Pipeline Use Cases (Weather Extractor & Transformer)
 ```
 
 ### How to run
@@ -21,17 +21,39 @@ src/
 #### Prerequisites
 
 * Python 3.12+
-* uv (fast Python package installer)
 
-#### Setup & Execution
+#### How to Run
+### Option 1: Using `uv` (Recommended)
 
 ```bash
-uv sync # install dependencies
-uv run main.py # run script
+# Sync environment and install dependencies
+uv sync
+
+# Run pipeline with default cities
+uv run main.py
+
+# Run pipeline with custom cities
+uv run main.py --cities "New York" Tokyo "Buenos Aires"
+```
+
+### Option 2: Using standard `pip` and `venv`
+
+```bash
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run pipeline
+python main.py --cities "New York" Tokyo "Buenos Aires"
 ```
 
 #### Inspect Output:
 The output DataFrame will print to stdout and export directly to weather_data.csv.
+
+=================================================
 
 ## Architecture & Solution Design
 This project strictly adheres to Clean Architecture (Ports & Adapters / Hexagonal) principles to decouple core data-processing mechanics from domain logic and framework dependencies.
