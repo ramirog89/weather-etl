@@ -65,7 +65,11 @@ uv run main.py
 
 2. **Start the API server:**
 ```bash
+# uv
 uv run uvicorn src.infrastructure.http.server:app --reload
+
+# python
+python -m uvicorn src.infrastructure.http.server:app --reload
 ```
 
 3. **Access Endpoints:**
