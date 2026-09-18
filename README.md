@@ -78,6 +78,25 @@ python -m uvicorn src.infrastructure.http.server:app --reload
 * CSV Download: http://127.0.0.1:8000/csv
 * Interactive API Docs: http://127.0.0.1:8000/docs
 
+
+## Interpreting the Output
+
+Upon successful execution, the pipeline generates two output artifacts in the `output/` directory:
+
+### 1. Weather Data CSV (`output/weather_data.csv`)
+The primary tabular output containing normalized weather metrics for all resolved cities, sorted by current temperature in descending order (warmest to coolest).
+
+* **`City`**: Name of the target city.
+* **`Temperature (C)`**: Current ambient temperature in degrees Celsius (°C).
+* **`Temperature (F)`**: Current ambient temperature in degrees Fahrenheit (°F).
+* **`Humidity (%)`**: Current relative humidity %.
+* **`Wind Speed (m/s)`**: Current wind speed measured in meters per second (ms).
+* **`Wind Speed (mph)`**: Current wind speed measured in miles per hour (mp/h).
+
+### 2. Temperature Comparison Chart (`output/temperature_chart.png`)
+A generated bar chart visually comparing the current temperatures across all processed cities. This provides an immediate visual summary of regional temperature variations without parsing raw CSV rows.
+
+
 =================================================
 
 ## Architecture & Solution Design
