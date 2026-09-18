@@ -12,6 +12,11 @@ from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisuali
 
 
 def main(city_names: List[str] = None):
+    """
+    Composition Root: Instantiating concrete infrastructure adapters 
+        and injecting them into application services/use cases.
+    """
+
     # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(

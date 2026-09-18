@@ -19,6 +19,11 @@ class WeatherExtractor(ExtractorPort[List[Weather]]):
 
 class WeatherTransformer(TransformerPort[List[Weather]]):
     def transform(self, data: List[Weather]) -> pd.DataFrame:
+        """
+        Validates raw JSON responses, converts structures into tabular DataFrames,
+        and applies domain sorting rules (highest temperature first).
+        """
+
         if not data:
             return pd.DataFrame()
 
