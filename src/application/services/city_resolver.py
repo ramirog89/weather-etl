@@ -1,7 +1,7 @@
 from typing import List
 from src.application.ports.geocoding import GeocodingPort
 from src.domain import City
-
+from src.domain.exceptions import ExtractionError
 
 class CityResolverService:
     def __init__(self, geocoding_adapter: GeocodingPort):
@@ -13,11 +13,14 @@ class CityResolverService:
 
         print("--- Resolving City Coordinates ---")
         for name in city_names:
-            city = self.geocoding_adapter.get_city_coordinates(name)
-            if city:
-                resolved_cities.append(city)
-                print(f"Resolved: {city.name} ({city.latitude}, {city.longitude})")
-            else:
-                print(f"Warning: Could not resolve coordinates for '{name}'. Skipping.")
+            try:
+                city = self.geocoding_adapter.get_city_coordinates(name)
+                if city:
+                    resolved_cities.append(city)
+                    print(f"Resolved: {city.name} ({city.latitude}, {city.longitude})")
+                else:
+                    print(f"Warning: Could not resolve coordinates for '{name}'. Skipping.")
+            except ExtractionError as err:
+                print(f"Warning: Failed to fetch coordinates for '{name}': {err}. Skipping.")
 
         return resolved_cities

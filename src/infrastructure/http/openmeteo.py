@@ -1,7 +1,7 @@
 from src.application.ports.extractor import ExtractorPort
 from src.domain import City, Weather
-from src.infrastructure.http.client import HTTPClient
-
+from src.domain.exceptions import ExtractionError
+from src.infrastructure.http.client import HTTPClient, HTTPClientError
 
 class OpenMeteoClient(ExtractorPort):
 
@@ -16,13 +16,18 @@ class OpenMeteoClient(ExtractorPort):
             "current": "temperature_2m,relative_humidity_2m,wind_speed_10m",
             "wind_speed_unit": "mph",
         }
-        
-        payload = self.http_client.get(self.base_url, params=params)
-        data = payload["current"]
 
-        return Weather(
-            city_name=city.name,
-            temperature_c=data["temperature_2m"],
-            wind_speed_mph=data["wind_speed_10m"],
-            humidity=data["relative_humidity_2m"],
-        )
+        try:
+            payload = self.http_client.get(self.base_url, params=params)
+            data = payload["current"]
+
+            return Weather(
+                city_name=city.name,
+                temperature_c=data["temperature_2m"],
+                wind_speed_mph=data["wind_speed_10m"],
+                humidity=data["relative_humidity_2m"],
+            )
+        except HTTPClientError as err:
+            raise ExtractionError(
+                f"Failed to extract weather data for city '{city.name}': {err}"
+            ) from err

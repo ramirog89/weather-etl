@@ -1,8 +1,10 @@
+import sys
 import argparse
 from typing import List
 
 from src.application.services import ETLPipeline, CityResolverService
 from src.application.usecases.weather import WeatherExtractor, WeatherTransformer
+from src.domain.exceptions import ETLException
 from src.infrastructure.config import settings
 from src.infrastructure.http import HTTPClient, OpenMeteoClient, OpenMeteoGeocodingClient
 from src.infrastructure.storage.csv import CSVLoader
@@ -10,7 +12,6 @@ from src.infrastructure.visualization.matplotlib import MatplotlibWeatherVisuali
 
 
 def main(city_names: List[str] = None):
-
     # infrastructure
     http_client = HTTPClient()
     open_meteo_client = OpenMeteoClient(
@@ -66,4 +67,12 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    main(city_names=args.cities)
+
+    try:
+        main(city_names=args.cities)
+    except ETLException as err:
+        print(f"\n[ETL Execution Error] {err}")
+        sys.exit(1)
+    except Exception as err:
+        print(f"\n[Fatal System Error] An unexpected error occurred: {err}")
+        sys.exit(1)

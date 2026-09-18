@@ -1,9 +1,11 @@
-from typing import List
 import pandas as pd
+from typing import List
+from pydantic import ValidationError
 
 from src.application.ports.extractor import ExtractorPort
 from src.application.ports.transformer import TransformerPort
 from src.domain import City, Weather
+from src.domain.exceptions import TransformationError
 from src.infrastructure.http.openmeteo import OpenMeteoClient
 
 
@@ -20,28 +22,34 @@ class WeatherTransformer(TransformerPort[List[Weather]]):
         if not data:
             return pd.DataFrame()
 
-        records = [w.model_dump() for w in data]
-        df = pd.DataFrame(records)
-        df = df.sort_values(by="temperature_c", ascending=False).reset_index(drop=True)
+        try:
+            records = [w.model_dump() for w in data]
+            df = pd.DataFrame(records)
+            df = df.sort_values(by="temperature_c", ascending=False).reset_index(drop=True)
 
-        column_mapping = {
-            "city_name": "City",
-            "temperature_c": "Temperature (C)",
-            "temperature_f": "Temperature (F)",
-            "humidity": "Humidity (%)",
-            "wind_speed_ms": "Wind Speed (m/s)",
-            "wind_speed_mph": "Wind Speed (mph)",
-        }
+            column_mapping = {
+                "city_name": "City",
+                "temperature_c": "Temperature (C)",
+                "temperature_f": "Temperature (F)",
+                "humidity": "Humidity (%)",
+                "wind_speed_ms": "Wind Speed (m/s)",
+                "wind_speed_mph": "Wind Speed (mph)",
+            }
 
-        df = df.rename(columns=column_mapping)
+            df = df.rename(columns=column_mapping)
 
-        ordered_columns = [
-            "City",
-            "Temperature (C)",
-            "Temperature (F)",
-            "Humidity (%)",
-            "Wind Speed (m/s)",
-            "Wind Speed (mph)",
-        ]
-
-        return df[ordered_columns]
+            ordered_columns = [
+                "City",
+                "Temperature (C)",
+                "Temperature (F)",
+                "Humidity (%)",
+                "Wind Speed (m/s)",
+                "Wind Speed (mph)",
+            ]
+            return df[ordered_columns]
+        except ValidationError as e:
+            raise TransformationError(f"Schema mismatch: Open-Meteo response structure changed: {e}")
+        except KeyError as e:
+            raise TransformationError(f"Missing expected key during DataFrame transformation: {e}")
+        except Exception as e:
+            raise TransformationError(f"Unexpected error during data transformation: {str(e)}")
