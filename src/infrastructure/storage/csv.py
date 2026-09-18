@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 from src.application.ports.loader import LoaderPort
 from src.domain.exceptions import LoadingError
@@ -10,6 +11,8 @@ class CSVLoader(LoaderPort):
             raise ValueError("Cannot write an empty DataFrame to CSV.")
 
         try:
+            path = Path(destination)
+            path.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(destination, index=False)
             print(f"Data successfully exported to {destination}")
         except PermissionError:
