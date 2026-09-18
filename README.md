@@ -53,6 +53,27 @@ python main.py --cities "New York" Tokyo "Buenos Aires"
 #### Inspect Output:
 The output DataFrame will print to stdout and export directly to weather_data.csv.
 
+
+### Optional: Web API Server
+
+If `fastapi` and `uvicorn` are installed, you can serve generated artifacts over HTTP endpoints.
+
+1. **Run the ETL pipeline to generate outputs:**
+```bash
+uv run main.py
+```
+
+2. **Start the API server:**
+```bash
+uv run uvicorn src.infrastructure.http.server:app --reload
+```
+
+3. **Access Endpoints:**
+
+* Chart Image: http://127.0.0.1:8000/graphs
+* CSV Download: http://127.0.0.1:8000/csv
+* Interactive API Docs: http://127.0.0.1:8000/docs
+
 =================================================
 
 ## Architecture & Solution Design
